@@ -12,11 +12,12 @@ int in3 = 8;
 
 void setup() {
 
-  initializeMotors();
+  initialize_motors();
   motor_function(0,0);
+  run_motor_sequence();
 }
 
-void initializeMotors() {
+void initialize_motors() {
 
   // Set all the motor control pins to output
   pinMode(in1, OUTPUT);
@@ -28,6 +29,35 @@ void initializeMotors() {
 
   // stop
   motor_function(0, 0);
+}
+
+
+void run_motor_sequence() {
+
+  // Example movement commands using the motor_function
+  int left_speed = 150;
+  int right_speed = 150;
+  int time = 1000;
+  // forward
+  motor_function(left_speed,right_speed);
+  delay(time);
+  //stop
+  motor_function(0, 0); 
+  delay(time);
+  // backward
+  motor_function(-left_speed,-right_speed);  
+  delay(time);
+  //turn left
+  motor_function(-left_speed, right_speed);  
+  delay(time);
+  //stop
+  motor_function(0, 0);  // Stop all motors
+  delay(time);
+  // turn right
+  motor_function(left_speed, -right_speed);  
+  delay(time);
+
+  motor_function(0, 0);  // Stop all motors
 }
 
 
@@ -76,6 +106,7 @@ void motor_function(int left_speed, int right_speed) {
 
  
 }
+
 
 
 
