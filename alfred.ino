@@ -1,13 +1,17 @@
+#include <SoftwareSerial.h>
+
+// Bluetooth module connection
+SoftwareSerial Bluetooth(10, 11); // RX, TX
 
 // Motor A connections- right
 // int enA = 5;
-int in1 = 7;
-int in2 = 6;
+const int in1 = 7;
+const int in2 = 6;
 
 // Motor B connections- left
 // int enB = 10;
-int in4 = 9;
-int in3 = 8;
+const int in4 = 9;
+const int in3 = 8;
 
 
 void setup() {
@@ -15,6 +19,12 @@ void setup() {
   initialize_motors();
   motor_function(0,0);
   run_motor_sequence();
+
+// Initialize Bluetooth communication
+  Bluetooth.begin(9600);
+  Serial.begin(9600); // For debugging
+  Serial.println("Initializing...");
+  Serial.println("The device started, now you can pair it with bluetooth!");
 }
 
 void initialize_motors() {
@@ -29,6 +39,8 @@ void initialize_motors() {
 
   // stop
   motor_function(0, 0);
+
+
 }
 
 
@@ -84,6 +96,29 @@ void motor_function(int left_speed, int right_speed) {
     digitalWrite(in4, LOW);
   }
   
+  void bluetooth_command(char command) {
+
+  switch (command) {
+    case 'F': // Move forward
+      motor_function(left_speed, right_speed);
+      break;
+    case 'B': // Move backward
+      motor_function(-left_speed, -right_speed);
+      break;
+    case 'L': // Turn left
+      motor_function(-left_speed, right_speed);
+      break;
+    case 'R': // Turn right
+      motor_function(left_speed, -right_speed);
+      break;
+    case 'S': // Stop
+      motor_function(0, 0);
+      break;
+    case 'Q': // Execute sequence
+      runMotorSequence();
+      break;
+
+  }
 
   // B - right side 
 
@@ -111,6 +146,15 @@ void motor_function(int left_speed, int right_speed) {
 
 
 void loop() {
-  //...
 
+    while  (Serial.available() > 0)
+
+       if (Bluetooth.available()) {
+
+            char command = Bluetooth.read();
+
+
+            bluetooth_command(command);
+   }
+   
 }
