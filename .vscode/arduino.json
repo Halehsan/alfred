@@ -1,5 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "test_bluetooth\\test_bluetooth.ino",
-    "port": "COM3"
+    "sketch": "alfred.ino",
+    "port": "COM3",
+    "programmer": "avrispmkii"
 }

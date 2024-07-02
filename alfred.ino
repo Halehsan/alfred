@@ -1,160 +1,158 @@
 #include <SoftwareSerial.h>
 
 // Bluetooth module connection
-SoftwareSerial Bluetooth(10, 11); // RX, TX
+SoftwareSerial Bluetooth(3, 2); // RX, TX
 
-// Motor A connections- right
-// int enA = 5;
-const int in1 = 7;
-const int in2 = 6;
+// Motor A connections - right
+const int in1_A= 8;
+const int in2_A = 3;
+const int in3_B = 4;
+const int in4_B = 5;
 
-// Motor B connections- left
-// int enB = 10;
-const int in4 = 9;
-const int in3 = 8;
 
+
+// Motor B connections - left
+const int in1_C = 12;
+const int in2_C= 6;
+const int in3_D = 13;
+const int in4_D = 9;
+
+// Motor speeds and delay time
+const int A_speed = 100;
+const int B_speed = 100;
+const int C_speed = 100;
+const int D_speed = 100;
+
+const int time_delay = 1000;
 
 void setup() {
-
+  // Initialize the motors and Bluetooth communication
   initialize_motors();
-  motor_function(0,0);
-  run_motor_sequence();
-
-// Initialize Bluetooth communication
+  motor_function(0, 0,0,0); 
   Bluetooth.begin(9600);
-  Serial.begin(9600); // For debugging
-  Serial.println("Initializing...");
-  Serial.println("The device started, now you can pair it with bluetooth!");
+  Serial.begin(9600); 
 }
 
 void initialize_motors() {
-
   // Set all the motor control pins to output
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
-  // pinMode(enA, OUTPUT);
-  // pinMode(enB, OUTPUT);
+  pinMode(in1_A, OUTPUT);
+  pinMode(in2_A, OUTPUT);
+  pinMode(in3_B, OUTPUT);
+  pinMode(in4_B, OUTPUT);
+  
+  pinMode(in1_C, OUTPUT);
+  pinMode(in2_C, OUTPUT);
+  pinMode(in3_D, OUTPUT);
+  pinMode(in4_D, OUTPUT);
 
-  // stop
-  motor_function(0, 0);
-
-
+  // Stop all motors initially
+  motor_function(0, 0,0,0);
 }
-
 
 void run_motor_sequence() {
-
   // Example movement commands using the motor_function
-  int left_speed = 150;
-  int right_speed = 150;
-  int time = 1000;
-  // forward
-  motor_function(left_speed,right_speed);
-  delay(time);
-  //stop
-  motor_function(0, 0); 
-  delay(time);
-  // backward
-  motor_function(-left_speed,-right_speed);  
-  delay(time);
-  //turn left
-  motor_function(-left_speed, right_speed);  
-  delay(time);
-  //stop
-  motor_function(0, 0);  // Stop all motors
-  delay(time);
-  // turn right
-  motor_function(left_speed, -right_speed);  
-  delay(time);
 
-  motor_function(0, 0);  // Stop all motors
+  motor_function(A_speed, B_speed, C_speed,D_speed);// Forward
+  delay(time_delay);
+  motor_function(0, 0, 0, 0); // Stop
+  delay(time_delay);
+  motor_function(-A_speed, -B_speed, -C_speed, -D_speed); // Backward
+  delay(time_delay);
+  motor_function(-A_speed, B_speed, -C_speed, D_speed); // Turn left
+  delay(time_delay);
+  motor_function(0, 0, 0, 0); // StopS
+  delay(time_delay);
+  motor_function(A_speed, -B_speed, C_speed, -D_speed); // Turn right
+  delay(time_delay);
+  motor_function(0, 0, 0, 0); // Stop
 }
 
 
-void motor_function(int left_speed, int right_speed) {
-
-    
-  // analogWrite(enB, abs(left_speed));
-  // analogWrite(enA, abs(right_speed));
-
-  // A - left side 
-  
-  if (left_speed > 0) {
-
-    analogWrite(in3, left_speed);
-    digitalWrite(in4, LOW);
-
-  } else if (left_speed < 0) {
-    
-    digitalWrite(in3, LOW);
-    analogWrite(in4, left_speed);
+void motor_function(int A_speed, int B_speed, int C_speed, int D_speed) {
+  // A 
+  if (A_speed > 0) {
+    analogWrite(in1_A, A_speed);
+    digitalWrite(in2_A, LOW);
+  } else if (A_speed < 0) {
+    digitalWrite(in1_A, LOW);
+    analogWrite(in2_A, -A_speed);
   } else {
-
-    digitalWrite(in3, LOW);
-    digitalWrite(in4, LOW);
+    digitalWrite(in1_A, LOW);
+    digitalWrite(in2_A, LOW);
   }
   
-  void bluetooth_command(char command) {
+  // B 
+  if (B_speed > 0) {
+    analogWrite(in3_B, B_speed);
+    digitalWrite(in4_B, LOW);
+  } else if (B_speed < 0) {
+    analogWrite(in3_B, -B_speed);
+    digitalWrite(in4_B, LOW);
+  } else {
+    digitalWrite(in3_B, LOW);
+    digitalWrite(in4_B, LOW);
+  }
 
-  switch (command) {
+  //C
+    if (C_speed > 0) {
+    analogWrite(in1_C, C_speed);
+    digitalWrite(in2_C, LOW);
+  } else if (C_speed < 0) {
+    analogWrite(in1_C, -C_speed);
+    digitalWrite(in2_C, LOW);
+  } else {
+    digitalWrite(in1_C, LOW);
+    digitalWrite(in2_C, LOW);
+  }
+
+  //D
+    if (D_speed > 0) {
+    analogWrite(in3_D, D_speed);
+    digitalWrite(in4_D, LOW);
+  } else if (D_speed < 0) {
+    analogWrite(in3_D, -D_speed);
+    digitalWrite(in4_D, LOW);
+  } else {
+    digitalWrite(in3_D, LOW);
+    digitalWrite(in4_D, LOW);
+  }
+}
+
+void bluetooth_command(String command) {
+  char cmd = command.charAt(0);
+
+  switch (cmd) {
     case 'F': // Move forward
-      motor_function(left_speed, right_speed);
+      motor_function(A_speed, B_speed, C_speed, D_speed);
       break;
     case 'B': // Move backward
-      motor_function(-left_speed, -right_speed);
+      motor_function(-A_speed, -B_speed, -C_speed, -D_speed);
       break;
     case 'L': // Turn left
-      motor_function(-left_speed, right_speed);
+      motor_function(-A_speed, B_speed, -C_speed, D_speed);
       break;
     case 'R': // Turn right
-      motor_function(left_speed, -right_speed);
+      motor_function(A_speed, -B_speed, C_speed, -D_speed);
       break;
     case 'S': // Stop
-      motor_function(0, 0);
+      motor_function(0, 0, 0, 0);
       break;
-    case 'Q': // Execute sequence
-      runMotorSequence();
+    case 'Q': // Sequence
+      run_motor_sequence();
       break;
-
+    default:
+      Serial.println("Invalid command received.");
+      break;
   }
-
-  // B - right side 
-
-  if (right_speed > 0) {
-    // Forward
-    analogWrite(in1, right_speed);
-    digitalWrite(in2, LOW);
-
-  } else if (right_speed < 0) {
-    // Backward
-    analogWrite(in2, right_speed);
-    digitalWrite(in1, LOW);
-
-  } else {
-    // Stop
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, LOW);
-
-  }
-
- 
 }
-
-
 
 
 void loop() {
-
-    while  (Serial.available() > 0)
-
-       if (Bluetooth.available()) {
-
-            char command = Bluetooth.read();
+  
+    if (Bluetooth.available()) {
+    String command = Bluetooth.readStringUntil('\n'); 
+    bluetooth_command(command);
 
 
-            bluetooth_command(command);
-   }
-   
+  }
 }
